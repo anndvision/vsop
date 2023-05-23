@@ -14,13 +14,12 @@ setup(
         "six",
         "click",
         "pandas",
-        "wandb",
+        "wandb==0.15.3",
         "seaborn",
-        "shortuuid",
+        "shortuuid==1.0.11",
         "matplotlib",
-        "tensorboard",
+        "tensorboard==2.13.0",
         "gymnasium[classic_control,atari,mujoco,accept-rom-license]",
-        "jax[cuda]"
         "gymnax",
         "brax",
         "optax",
@@ -32,7 +31,10 @@ setup(
     ],
     entry_points={
         "console_scripts": [
-
+            "ppo-mujoco=vsop.ppo_mujoco:main",
+            "vsop-mujoco=vsop.vsop_mujoco:main",
+            "a3c-mujoco=vsop.a3c_mujoco:main",
+            "rmpg-mujoco=vsop.rmpg_mujoco:main",
         ],
     },
 )
