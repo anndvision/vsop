@@ -1,0 +1,14 @@
+name: vsop
+channels:
+  - conda-forge
+  - defaults
+  - nvidia
+  - pytorch
+dependencies:
+  - black
+  - pip
+  - python=3.10
+  - jupyter
+  - pytorch=1.13.1
+  - cudnn>8.6
+  - cudatoolkit=11.7.0
