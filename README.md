@@ -111,3 +111,11 @@ python3 vsop/a3c_classic.py --job-dir output/ --env-id Pendulum-v1
 ```
 
 results can be viewed by running `plotting.ipynb`
+
+## tune example
+
+Here is an example to run hyperparameter tuning for VSOP on classic control using.
+
+```.sh
+python3 vsop/tune_vsop_classic.py
+```
