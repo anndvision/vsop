@@ -4,9 +4,9 @@ setup(
     name="vsop",
     version="0.0.0",
     description="",
-    url="",
-    author="Anonymized",
-    author_email="",
+    url="https://github.com/anndvision/vsop",
+    author="Andrew Jesson and Chris Lu",
+    author_email="andrew.jesson@cs.ox.ac.uk",
     license="Apache-2.0",
     packages=find_packages(),
     install_requires=[
