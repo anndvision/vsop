@@ -13,10 +13,10 @@ from ppo_mujoco_jax import make_train
 
 config = {
     "ANNEAL_LR": True,
+    "GAMMA": 0.99,
     "NUM_ENVS": 2048,
     "NUM_STEPS": 10,
     "TOTAL_TIMESTEPS": int(2e7),
-    "GAMMA": 0.99,
     "CLIP_EPS": 0.2,
     "ENT_COEF": 0.0,
     "VF_COEF": 0.5,
@@ -34,8 +34,8 @@ search_space = {
     "LR": tune.uniform(1e-4, 1e-3),
     "UPDATE_EPOCHS": tune.uniform(1, 10),
     "NUM_MINIBATCHES": tune.uniform(0, 6),
-    "GAE_LAMBDA": tune.uniform(0.9, 1.0),
-    "MAX_GRAD_NORM": tune.uniform(0.5, 6.0),
+    "GAE_LAMBDA": tune.uniform(0.0, 1.0),
+    "MAX_GRAD_NORM": tune.uniform(0.0, 5.0),
     "HSIZE": tune.uniform(6, 10),
 }
 
@@ -83,7 +83,7 @@ def func(config):
     session.report({"total_return": total_return})
 
 
-job_dir = Path("/users/andson/workbench/repos/mi/output/tune_ppo/brax")
+job_dir = Path().resolve() / Path("output/tune_ppo/brax")
 job_dir.mkdir(parents=True, exist_ok=True)
 
 analysis = tune.run(

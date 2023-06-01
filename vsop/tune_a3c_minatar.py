@@ -12,6 +12,8 @@ from a3c_minatar import make_train
 
 config = {
     "ANNEAL_LR": True,
+    "GAMMA": 0.99,
+    "NUM_ENVS": 64,
     "TOTAL_TIMESTEPS": int(1e7),
     "RELU_ADV": False,
     "ENT_COEF": 0.01,
@@ -29,12 +31,10 @@ config = {
 search_space = {
     "LR": tune.uniform(1e-4, 1e-3),
     "NUM_STEPS": tune.uniform(2, 8),
-    "NUM_ENVS": tune.uniform(5, 8),
     "UPDATE_EPOCHS": tune.uniform(1, 10),
-    "NUM_MINIBATCHES": tune.uniform(0, 8),
-    "GAMMA": tune.uniform(0.9, 1.0),
-    "GAE_LAMBDA": tune.uniform(0.9, 1.0),
-    "MAX_GRAD_NORM": tune.uniform(0.0, 12.0),
+    "NUM_MINIBATCHES": tune.uniform(0, 6),
+    "GAE_LAMBDA": tune.uniform(0.0, 1.0),
+    "MAX_GRAD_NORM": tune.uniform(0.0, 5.0),
     "HSIZE": tune.uniform(6, 10),
 }
 
@@ -60,10 +60,8 @@ def round_to_multiple(number, multiple):
 def func(config):
     config["LR"] = round_to_multiple(config["LR"], 0.00005)
     config["NUM_STEPS"] = 2 ** int(config["NUM_STEPS"])
-    config["NUM_ENVS"] = 2 ** int(config["NUM_ENVS"])
     config["UPDATE_EPOCHS"] = int(config["UPDATE_EPOCHS"])
     config["NUM_MINIBATCHES"] = 2 ** int(config["NUM_MINIBATCHES"])
-    config["GAMMA"] = round_to_multiple(config["GAMMA"], 0.002)
     config["GAE_LAMBDA"] = round_to_multiple(config["GAE_LAMBDA"], 0.002)
     config["MAX_GRAD_NORM"] = round_to_multiple(config["MAX_GRAD_NORM"], 0.1)
     config["HSIZE"] = 2 ** int(config["HSIZE"])
@@ -86,7 +84,7 @@ def func(config):
     tune.report(mean_loss=-total_return)
 
 
-job_dir = Path("/users/andson/workbench/repos/mi/output/tune_a3c/minatar")
+job_dir = Path().resolve() / Path("output/tune_a3c/minatar")
 job_dir.mkdir(parents=True, exist_ok=True)
 
 analysis = tune.run(
