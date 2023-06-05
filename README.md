@@ -1,6 +1,6 @@
 # vsop
 
-Implementation of ReLU to the Rescue: Improve Your On-Policy Actor-Critic with Positive Advantages
+[Implementation of ReLU to the Rescue: Improve Your On-Policy Actor-Critic with Positive Advantages](https://arxiv.org/abs/2306.01460)
 
 ```
 @article{jesson2023relu,
