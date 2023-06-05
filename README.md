@@ -6,7 +6,7 @@ Implementation of ReLU to the Rescue: Improve Your On-Policy Actor-Critic with P
 @article{jesson2023relu,
   title={ReLU to the Rescue: Improve Your On-Policy Actor-Critic with Positive Advantages},
   author={Jesson, Andrew and Lu, Chris and Gupta, Gunshi and Filos, Angelos and Foerster, Jakob N. and Gal, Yarin},
-  journal={arXiv preprint arXiv:xxxx.xxxxx},
+  journal={arXiv preprint arXiv:2306.01460},
   year={2023}
 }
 ```
