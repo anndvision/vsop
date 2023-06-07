@@ -63,7 +63,7 @@ def parse_args():
     parser.add_argument(
         "--learning-rate",
         type=float,
-        default=3.5e-4,
+        default=4.5e-4,
         help="the learning rate of the optimizer",
     )
     parser.add_argument(
@@ -95,7 +95,7 @@ def parse_args():
     parser.add_argument(
         "--gae-lambda",
         type=float,
-        default=0.982,
+        default=0.714,
         help="the lambda for the general advantage estimation",
     )
     parser.add_argument(
@@ -107,7 +107,7 @@ def parse_args():
     parser.add_argument(
         "--update-epochs",
         type=int,
-        default=2,
+        default=3,
         help="the K epochs to update the policy",
     )
     parser.add_argument(
@@ -147,7 +147,7 @@ def parse_args():
     parser.add_argument(
         "--max-grad-norm",
         type=float,
-        default=4.7,
+        default=3.3,
         help="the maximum norm for the gradient clipping",
     )
     parser.add_argument(

@@ -34,7 +34,7 @@ def parse_args():
     parser.add_argument(
         "--num-seeds",
         type=int,
-        default=10,
+        default=20,
         help="number of random repetitions",
     )
     parser.add_argument(
@@ -61,13 +61,13 @@ def parse_args():
     parser.add_argument(
         "--learning-rate",
         type=float,
-        default=7e-4,
+        default=1e-3,
         help="the learning rate of the optimizer",
     )
     parser.add_argument(
         "--num-envs",
         type=int,
-        default=64,
+        default=8,
         help="the number of parallel game environments",
     )
     parser.add_argument(
@@ -87,25 +87,25 @@ def parse_args():
     parser.add_argument(
         "--gamma",
         type=float,
-        default=0.976,
+        default=0.99,
         help="the discount factor gamma",
     )
     parser.add_argument(
         "--gae-lambda",
         type=float,
-        default=0.938,
+        default=0.54,
         help="the lambda for the general advantage estimation",
     )
     parser.add_argument(
         "--num-minibatches",
         type=int,
-        default=16,
+        default=8,
         help="the number of mini-batches",
     )
     parser.add_argument(
         "--update-epochs",
         type=int,
-        default=8,
+        default=3,
         help="the K epochs to update the policy",
     )
     parser.add_argument(
@@ -145,7 +145,7 @@ def parse_args():
     parser.add_argument(
         "--max-grad-norm",
         type=float,
-        default=11.5,
+        default=3.4,
         help="the maximum norm for the gradient clipping",
     )
     parser.add_argument(
