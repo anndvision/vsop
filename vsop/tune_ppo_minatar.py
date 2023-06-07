@@ -13,7 +13,7 @@ from ppo_minatar import make_train
 config = {
     "ANNEAL_LR": True,
     "GAMMA": 0.99,
-    "NUM_ENVS": 64,
+    "NUM_ENVS": 128,
     "TOTAL_TIMESTEPS": int(1e7),
     "CLIP_EPS": 0.2,
     "ENT_COEF": 0.01,
@@ -30,9 +30,9 @@ config = {
 
 search_space = {
     "LR": tune.uniform(1e-4, 1e-3),
-    "NUM_STEPS": tune.uniform(2, 8),
+    "NUM_STEPS": tune.uniform(4, 8),
     "UPDATE_EPOCHS": tune.uniform(1, 10),
-    "NUM_MINIBATCHES": tune.uniform(0, 6),
+    "NUM_MINIBATCHES": tune.uniform(3, 5),
     "GAE_LAMBDA": tune.uniform(0.7, 1.0),
     "MAX_GRAD_NORM": tune.uniform(0.2, 5.0),
     "HSIZE": tune.uniform(6, 10),
