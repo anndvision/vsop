@@ -63,7 +63,7 @@ def parse_args():
     parser.add_argument(
         "--learning-rate",
         type=float,
-        default=7.5e-3,
+        default=7e-4,
         help="the learning rate of the optimizer",
     )
     parser.add_argument(
@@ -133,7 +133,7 @@ def parse_args():
     parser.add_argument(
         "--max-grad-norm",
         type=float,
-        default=4.1,
+        default=1.0,
         help="the maximum norm for the gradient clipping",
     )
     parser.add_argument(
@@ -148,7 +148,7 @@ def parse_args():
     parser.add_argument(
         "--width",
         type=int,
-        default=64,
+        default=128,
         help="depth of neural network",
     )
     parser.add_argument(
