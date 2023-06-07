@@ -20,14 +20,7 @@ setup(
         "matplotlib==3.7.1",
         "tensorboard==2.13.0",
         "gymnasium[classic_control,atari,mujoco,accept-rom-license]==0.28.1",
-        "gymnax==0.0.6",
-        "brax==0.9.0",
-        "optax==0.1.5",
-        "distrax==0.1.2",
-        "dm-haiku==0.0.9",
-        "flax==0.6.10",
         "mujoco==2.3.3",
-        "bayesian-optimization==1.4.3",
     ],
     entry_points={
         "console_scripts": [

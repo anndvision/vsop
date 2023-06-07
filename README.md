@@ -2,7 +2,7 @@
 
 [Implementation of ReLU to the Rescue: Improve Your On-Policy Actor-Critic with Positive Advantages](https://arxiv.org/abs/2306.01460)
 
-```
+```.txt
 @article{jesson2023relu,
   title={ReLU to the Rescue: Improve Your On-Policy Actor-Critic with Positive Advantages},
   author={Jesson, Andrew and Lu, Chris and Gupta, Gunshi and Filos, Angelos and Foerster, Jakob N. and Gal, Yarin},
@@ -13,16 +13,31 @@
 
 ## installation
 
-```.sh
-conda env create -f environment.yml
+### torch
 
-conda activate vsop
+Install this if using gymnasium
+
+```.sh
+conda env create -f environment-torch.yml
+
+conda activate vsop-torch
+
+pip install -e .
+```
+
+### jax
+
+Install this if using gymnax
+
+```.sh
+conda env create -f environment-jax.yml
+
+conda activate vsop-jax
 
 export LD_LIBRARY_PATH=$CONDA_PREFIX/lib/
 
-pip install --upgrade "jax[cuda]" -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html
-
-pip install -e .
+python3 -m pip install --upgrade "jax[cuda]==0.4.11" -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html
+python3 -m pip install gymnax==0.0.6 brax==0.9.0 optax==0.1.5 distrax==0.1.2 dm-haiku==0.0.9 flax==0.6.10 mujoco==2.3.3 ray[tune]==2.4.0 bayesian-optimization==1.4.3 seaborn==0.12.2
 ```
 
 ## run
