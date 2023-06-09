@@ -409,14 +409,20 @@ def make_train(config):
                         log_prob = pi.log_prob(traj_batch.action)
 
                         # CALCULATE VALUE LOSS
-                        value_pred_clipped = traj_batch.value + (
-                            value - traj_batch.value
-                        ).clip(-config["CLIP_EPS"], config["CLIP_EPS"])
-                        value_losses = jnp.square(value - targets)
-                        value_losses_clipped = jnp.square(value_pred_clipped - targets)
-                        value_loss = (
-                            0.5 * jnp.maximum(value_losses, value_losses_clipped).mean()
-                        )
+                        if config["CLIP_VLOSS"]:
+                            value_pred_clipped = traj_batch.value + (
+                                value - traj_batch.value
+                            ).clip(-config["CLIP_EPS"], config["CLIP_EPS"])
+                            value_losses = jnp.square(value - targets)
+                            value_losses_clipped = jnp.square(
+                                value_pred_clipped - targets
+                            )
+                            value_loss = (
+                                0.5
+                                * jnp.maximum(value_losses, value_losses_clipped).mean()
+                            )
+                        else:
+                            value_loss = jnp.square(value - targets).mean()
 
                         # CALCULATE ACTOR LOSS
                         alpha = 2.0
@@ -432,6 +438,8 @@ def make_train(config):
                         )
                         drift = drift1 * is_pos + drift2 * (1 - is_pos)
                         loss_actor = -(ratio * gae - drift).mean()
+
+                        # ENTROPY
                         entropy = pi.entropy().mean()
 
                         total_loss = (
