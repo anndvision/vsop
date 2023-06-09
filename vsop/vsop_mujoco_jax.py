@@ -63,7 +63,7 @@ def parse_args():
     parser.add_argument(
         "--learning-rate",
         type=float,
-        default=4e-3,
+        default=1e-4,
         help="the learning rate of the optimizer",
     )
     parser.add_argument(
@@ -95,13 +95,13 @@ def parse_args():
     parser.add_argument(
         "--gae-lambda",
         type=float,
-        default=0.926,
+        default=1.0,
         help="the lambda for the general advantage estimation",
     )
     parser.add_argument(
         "--num-minibatches",
         type=int,
-        default=32,
+        default=64,
         help="the number of mini-batches",
     )
     parser.add_argument(
@@ -125,7 +125,7 @@ def parse_args():
     parser.add_argument(
         "--max-grad-norm",
         type=float,
-        default=2.1,
+        default=3.7,
         help="the maximum norm for the gradient clipping",
     )
     parser.add_argument(
