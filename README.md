@@ -72,6 +72,26 @@ rmpg-mujoco --gpu-per-rep 0.5 --track True --env-id HalfCheetah-v4
 
 Results can be viewed by logging into Weights and Biases
 
+#### procgen
+
+VSOP
+
+```.sh
+vsop-procgen --gpu-per-rep 1.0 --track True env-id starpilot
+```
+
+PPO
+
+```.sh
+ppo-procgen --gpu-per-rep 1.0 --track True env-id starpilot
+```
+
+RMPG
+
+```.sh
+rmpg-procgen --gpu-per-rep 1.0 --track True env-id starpilot
+```
+
 ### gymnax
 
 #### brax-mujoco

@@ -162,4 +162,5 @@ cython_debug/
 wandb*
 runs*
 output*
+logs*
 .vscode
