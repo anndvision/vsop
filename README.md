@@ -52,7 +52,7 @@ VSOP
 vsop-mujoco --gpu-per-rep 0.5 --track True --env-id HalfCheetah-v4
 ```
 
-PPO
+VSPPO
 
 ```.sh
 ppo-mujoco --gpu-per-rep 0.5 --track True --env-id HalfCheetah-v4

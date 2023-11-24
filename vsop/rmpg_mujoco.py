@@ -586,6 +586,8 @@ def run_experiment(exp_name, args, seed):
     num_updates = args.total_timesteps // args.batch_size
     video_filenames = set()
 
+    train_returns = []
+
     for update in range(1, num_updates + 1):
         # Annealing the rate if instructed to do so.
         if args.anneal_lr:
@@ -621,6 +623,7 @@ def run_experiment(exp_name, args, seed):
                 for info in infos["final_info"]:
                     # Skip the envs that are not done
                     if info is not None:
+                        train_returns.append(info["episode"]["r"])
                         print(
                             f"global_step={global_step}, episodic_return={info['episode']['r']}"
                         )
@@ -735,7 +738,6 @@ def run_experiment(exp_name, args, seed):
         )
         writer.add_scalar("losses/value_loss", v_loss.item(), global_step)
         writer.add_scalar("losses/policy_loss", pg_loss.item(), global_step)
-        print("SPS:", int(global_step / (time.time() - start_time)))
         writer.add_scalar(
             "charts/SPS", int(global_step / (time.time() - start_time)), global_step
         )
@@ -748,6 +750,7 @@ def run_experiment(exp_name, args, seed):
 
     envs.close()
     writer.close()
+    return np.mean(train_returns[-100:])
 
 
 if __name__ == "__main__":

@@ -130,7 +130,7 @@ def parse_args():
     parser.add_argument(
         "--learning-rate",
         type=float,
-        default=3e-4,
+        default=2e-4,
         help="the learning rate of the optimizer",
     )
     parser.add_argument(
@@ -168,7 +168,7 @@ def parse_args():
     parser.add_argument(
         "--gae-lambda",
         type=float,
-        default=0.95,
+        default=0.61,
         help="the lambda for the general advantage estimation",
     )
     parser.add_argument(
@@ -180,7 +180,7 @@ def parse_args():
     parser.add_argument(
         "--update-epochs",
         type=int,
-        default=10,
+        default=9,
         help="the K epochs to update the policy",
     )
     parser.add_argument(
@@ -212,7 +212,7 @@ def parse_args():
     parser.add_argument(
         "--max-grad-norm",
         type=float,
-        default=np.inf,
+        default=7.14,
         help="the maximum norm for the gradient clipping",
     )
     parser.add_argument(
@@ -262,7 +262,7 @@ def parse_args():
     parser.add_argument(
         "--dropout-rate",
         type=float,
-        default=0.02,
+        default=0.025,
         help="dropout rate",
     )
     parser.add_argument(
@@ -528,6 +528,7 @@ def run_experiment(exp_name, args, seed):
         optimizer = optim.Adam(
             agent.parameters(),
             lr=args.learning_rate,
+            eps=1e-5,
         )
 
     # ALGO Logic: Storage setup
@@ -701,9 +702,26 @@ def run_experiment(exp_name, args, seed):
         writer.add_scalar("losses/approx_kl", approx_kl.item(), global_step)
         writer.add_scalar("losses/clipfrac", np.mean(clipfracs), global_step)
         writer.add_scalar("losses/explained_variance", explained_var, global_step)
-        print("SPS:", int(global_step / (time.time() - start_time)))
         writer.add_scalar(
             "charts/SPS", int(global_step / (time.time() - start_time)), global_step
+        )
+        writer.add_histogram(
+            "histograms/advantages",
+            b_advantages.flatten(),
+            global_step,
+            bins=128,
+        )
+        writer.add_histogram(
+            "histograms/relu_advantages",
+            torch.nn.functional.relu(b_advantages).flatten(),
+            global_step,
+            bins=128,
+        )
+        writer.add_histogram(
+            "histograms/softplus_advantages",
+            torch.nn.functional.softplus(b_advantages, 100.0).flatten(),
+            global_step,
+            bins=128,
         )
 
         if args.track and args.capture_video:

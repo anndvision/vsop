@@ -130,7 +130,7 @@ def parse_args():
     parser.add_argument(
         "--learning-rate",
         type=float,
-        default=3e-4,
+        default=2.5e-4,
         help="the learning rate of the optimizer",
     )
     parser.add_argument(
@@ -154,6 +154,12 @@ def parse_args():
         help="Toggle learning rate annealing for policy and value networks",
     )
     parser.add_argument(
+        "--num-weight-decay",
+        type=float,
+        default=2048,
+        help="Number of examples used to calculate weight decay",
+    )
+    parser.add_argument(
         "--gamma",
         type=float,
         default=0.99,
@@ -162,19 +168,19 @@ def parse_args():
     parser.add_argument(
         "--gae-lambda",
         type=float,
-        default=0.95,
+        default=0.89,
         help="the lambda for the general advantage estimation",
     )
     parser.add_argument(
         "--num-minibatches",
         type=int,
-        default=32,
+        default=64,
         help="the number of mini-batches",
     )
     parser.add_argument(
         "--update-epochs",
         type=int,
-        default=10,
+        default=9,
         help="the K epochs to update the policy",
     )
     parser.add_argument(
@@ -214,7 +220,7 @@ def parse_args():
     parser.add_argument(
         "--max-grad-norm",
         type=float,
-        default=0.5,
+        default=2.1,
         help="the maximum norm for the gradient clipping",
     )
     parser.add_argument(
@@ -239,30 +245,44 @@ def parse_args():
         const=True,
         help="normalize rewards",
     )
+    parser.add_argument(
+        "--thompson",
+        type=lambda x: bool(strtobool(x)),
+        default=True,
+        nargs="?",
+        const=True,
+        help="do thompson sampling",
+    )
+    parser.add_argument(
+        "--num-advantage-samples",
+        type=int,
+        default=1,
+        help="number of samples from value posterior to calculate advantages",
+    )
 
     # Agent specific arguments
     parser.add_argument(
         "--dim-hidden",
         type=int,
-        default=64,
+        default=256,
         help="width of neural network",
     )
     parser.add_argument(
         "--activation",
         type=str,
-        default="tanh",
+        default="relu",
         help="non-linearity of neural network",
     )
     parser.add_argument(
         "--dropout-rate",
         type=float,
-        default=0.0,
+        default=0.035,
         help="dropout rate",
     )
     parser.add_argument(
         "--spectral-norm",
         type=lambda x: bool(strtobool(x)),
-        default=False,
+        default=True,
         nargs="?",
         const=True,
         help="apply spectral normalization",
@@ -512,7 +532,18 @@ def run_experiment(exp_name, args, seed):
         spectral_norm=args.spectral_norm,
         orthogonal=args.orthogonal,
     ).to(device)
-    optimizer = optim.Adam(agent.parameters(), lr=args.learning_rate, eps=1e-5)
+    if args.num_weight_decay < np.inf:
+        optimizer = optim.AdamW(
+            agent.parameters(),
+            lr=args.learning_rate,
+            weight_decay=(1 - args.dropout_rate) / (2 * args.num_weight_decay),
+        )
+    else:
+        optimizer = optim.Adam(
+            agent.parameters(),
+            lr=args.learning_rate,
+            eps=1e-5,
+        )
 
     # ALGO Logic: Storage setup
     obs = torch.zeros(
@@ -524,7 +555,6 @@ def run_experiment(exp_name, args, seed):
     logprobs = torch.zeros((args.num_steps, args.num_envs)).to(device)
     rewards = torch.zeros((args.num_steps, args.num_envs)).to(device)
     dones = torch.zeros((args.num_steps, args.num_envs)).to(device)
-    values = torch.zeros((args.num_steps, args.num_envs)).to(device)
 
     # TRY NOT TO MODIFY: start the game
     global_step = 0
@@ -542,6 +572,8 @@ def run_experiment(exp_name, args, seed):
             lrnow = frac * args.learning_rate
             optimizer.param_groups[0]["lr"] = lrnow
 
+        if not args.thompson:
+            agent.eval()
         for step in range(0, args.num_steps):
             global_step += 1 * args.num_envs
             obs[step] = next_obs
@@ -549,8 +581,7 @@ def run_experiment(exp_name, args, seed):
 
             # ALGO LOGIC: action logic
             with torch.no_grad():
-                action, logprob, _, value = agent.get_action_and_value(next_obs)
-                values[step] = value.flatten()
+                action, logprob, _ = agent.get_action(next_obs)
             actions[step] = action
             logprobs[step] = logprob
 
@@ -580,36 +611,48 @@ def run_experiment(exp_name, args, seed):
                         )
 
         # bootstrap value if not done
-        with torch.no_grad():
-            next_value = agent.get_value(next_obs).reshape(1, -1)
-            advantages = torch.zeros_like(rewards).to(device)
-            lastgaelam = 0
-            for t in reversed(range(args.num_steps)):
-                if t == args.num_steps - 1:
-                    nextnonterminal = 1.0 - next_done
-                    nextvalues = next_value
-                else:
-                    nextnonterminal = 1.0 - dones[t + 1]
-                    nextvalues = values[t + 1]
-                delta = (
-                    rewards[t] + args.gamma * nextvalues * nextnonterminal - values[t]
+        b_obs = obs.reshape((-1,) + envs.single_observation_space.shape)
+        b_advantages, b_returns = [], []
+        for _ in range(args.num_advantage_samples):
+            with torch.no_grad():
+                values = agent.get_value(torch.cat([b_obs, next_obs], dim=0)).reshape(
+                    args.num_steps + 1, -1
                 )
-                advantages[t] = lastgaelam = (
-                    delta + args.gamma * args.gae_lambda * nextnonterminal * lastgaelam
-                )
-            returns = advantages + values
+                next_value = values[-1:]
+                values = values[:-1]
+                advantages = torch.zeros_like(rewards).to(device)
+                lastgaelam = 0
+                for t in reversed(range(args.num_steps)):
+                    if t == args.num_steps - 1:
+                        nextnonterminal = 1.0 - next_done
+                        nextvalues = next_value
+                    else:
+                        nextnonterminal = 1.0 - dones[t + 1]
+                        nextvalues = values[t + 1]
+                    delta = (
+                        rewards[t]
+                        + args.gamma * nextvalues * nextnonterminal
+                        - values[t]
+                    )
+                    advantages[t] = lastgaelam = (
+                        delta
+                        + args.gamma * args.gae_lambda * nextnonterminal * lastgaelam
+                    )
+                returns = advantages + values
+                b_advantages.append(advantages.unsqueeze(0))
+                b_returns.append(returns.unsqueeze(0))
 
         # flatten the batch
-        b_obs = obs.reshape((-1,) + envs.single_observation_space.shape)
         b_logprobs = logprobs.reshape(-1)
         b_actions = actions.reshape((-1,) + envs.single_action_space.shape)
-        b_advantages = advantages.reshape(-1)
-        b_returns = returns.reshape(-1)
+        b_advantages = torch.cat(b_advantages, dim=0).mean(0).reshape(-1)
+        b_returns = torch.cat(b_returns, dim=0).mean(0).reshape(-1)
         b_values = values.reshape(-1)
 
         # Optimizing the policy and value network
         b_inds = np.arange(args.batch_size)
         clipfracs = []
+        agent.train()
         for epoch in range(args.update_epochs):
             np.random.shuffle(b_inds)
             for start in range(0, args.batch_size, args.minibatch_size):
